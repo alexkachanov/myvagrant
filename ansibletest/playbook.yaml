@@ -1,0 +1,27 @@
+---
+- name: Provisioning
+  hosts: nodes
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: ping nodes
+    ping:
+  - name: install java from local repo
+    yum:
+      name: /vagrant/jdk-15_linux-x64_bin.rpm
+      state: present
+  - name: install maven
+    yum:
+      name: maven
+      state: present
+  - name: install unzip
+    yum:
+      name: unzip
+      state: present
+  - name: install sdkman
+    shell: "curl -s 'https://get.sdkman.io' | bash"
+  - name: install spring-boot
+    shell: "sdk install springboot"
+
+
+

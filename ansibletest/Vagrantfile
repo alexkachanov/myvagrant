@@ -1,0 +1,52 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", inline: "echo Hello"
+#  config.vm.box = "rodrigobrim/centos8" --- does not have ansible installed there
+   config.vm.box = "darkwizard242/ansiblecentos7"
+
+  config.vm.define "node1" do |machine|
+    machine.vm.define "node1"
+    machine.vm.hostname = "node1"
+    machine.vm.network "private_network", ip: "172.17.177.11"
+    machine.vm.network "forwarded_port", guest: 80, host: 8081
+    machine.vm.network "forwarded_port", guest: 443, host: 8441
+    machine.vm.provider :virtualbox do |vb|
+        vb.name = "node1"
+    end
+  end
+
+  config.vm.define "node2" do |machine|
+    machine.vm.define "node2"
+    machine.vm.hostname = "node2"
+    machine.vm.network "private_network", ip: "172.17.177.22"
+    machine.vm.network "forwarded_port", guest: 80, host: 8082
+    machine.vm.network "forwarded_port", guest: 443, host: 8442
+    machine.vm.provider :virtualbox do |vb|
+        vb.name = "node2"
+    end
+  end
+
+  config.vm.define "node3" do |machine|
+    machine.vm.define "node3"
+    machine.vm.hostname = "node3"
+    machine.vm.network "private_network", ip: "172.17.177.33"
+    machine.vm.network "forwarded_port", guest: 80, host: 8083
+    machine.vm.network "forwarded_port", guest: 443, host: 8443
+    machine.vm.provider :virtualbox do |vb|
+        vb.name = "node3"
+    end
+  end
+
+  config.vm.define "controller" do |machine|
+    machine.vm.define "controller"
+    machine.vm.hostname = "controller"
+    machine.vm.network "private_network", ip: "172.17.177.99"
+    machine.vm.provider :virtualbox do |vb|
+        vb.name = "controller"
+    end
+    machine.vm.provision "shell", inline: "sudo ansible-playbook /vagrant/playbook.yaml -i /vagrant/inventory"
+  end
+
+end
