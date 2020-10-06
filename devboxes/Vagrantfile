@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", inline: "echo Hello"
+
+  # devbox machine used for development
+  config.vm.define "devbox1" do |machine|
+#    machine.vm.box = "rodrigobrim/centos8"
+    machine.vm.box = "centos8minimal"
+    machine.vm.define "devbox1"
+    machine.vm.hostname = "devbox1"
+    machine.vm.network "private_network", ip: "172.17.177.11"
+    machine.vm.network "forwarded_port", guest: 80, host: 8081
+    machine.vm.network "forwarded_port", guest: 443, host: 8441
+    machine.vm.provider :virtualbox do |vb|
+        vb.name = "devbox1"
+    end
+  end
+
+  # using this machine to use ansible from it to provision the devbox machine with development tools and environment
+  config.vm.define "ansible" do |machine|
+    machine.vm.box = "darkwizard242/ansiblecentos7"
+    machine.vm.define "controller"
+    machine.vm.hostname = "controller"
+    machine.vm.network "private_network", ip: "172.17.177.99"
+    machine.vm.provider :virtualbox do |vb|
+        vb.name = "controller"
+    end
+    machine.vm.provision "shell", inline: "sudo ansible-playbook /vagrant/playbook.yaml -i /vagrant/inventory --ssh-common-args='-o StrictHostKeyChecking=no'"
+  end
+
+end
