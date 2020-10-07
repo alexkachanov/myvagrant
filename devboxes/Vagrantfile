@@ -6,28 +6,36 @@ Vagrant.configure("2") do |config|
 
   # devbox machine used for development
   config.vm.define "devbox1" do |machine|
-#    machine.vm.box = "rodrigobrim/centos8"
     machine.vm.box = "centos8minimal"
     machine.vm.define "devbox1"
     machine.vm.hostname = "devbox1"
+
     machine.vm.network "private_network", ip: "172.17.177.11"
     machine.vm.network "forwarded_port", guest: 80, host: 8081
+    machine.vm.network "forwarded_port", guest: 8080, host: 8888
     machine.vm.network "forwarded_port", guest: 443, host: 8441
+
     machine.vm.provider :virtualbox do |vb|
         vb.name = "devbox1"
     end
-  end
 
-  # using this machine to use ansible from it to provision the devbox machine with development tools and environment
-  config.vm.define "ansible" do |machine|
-    machine.vm.box = "darkwizard242/ansiblecentos7"
-    machine.vm.define "controller"
-    machine.vm.hostname = "controller"
-    machine.vm.network "private_network", ip: "172.17.177.99"
-    machine.vm.provider :virtualbox do |vb|
-        vb.name = "controller"
-    end
-    machine.vm.provision "shell", inline: "sudo ansible-playbook /vagrant/playbook.yaml -i /vagrant/inventory --ssh-common-args='-o StrictHostKeyChecking=no'"
+    machine.vm.provision "shell", inline: "systemctl stop firewalld"
+
+    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-15_linux-x64_bin.rpm -y"
+
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.6.3-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.6.3 /opt/maven"
+
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.3.4.RELEASE-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.3.4.RELEASE /opt/spring"
+
+    machine.vm.provision "shell", inline: "echo 'export JAVA_HOME=/usr/java/latest' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export M2_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export MAVEN_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+
+    machine.vm.provision "shell", inline: "echo 'export SPRING_HOME=/opt/spring' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export PATH=${SPRING_HOME}/bin:${M2_HOME}/bin:${PATH}' >> ~/.bash_profile", privileged: false
+
   end
 
 end
