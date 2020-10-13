@@ -1,0 +1,44 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |config|
+  config.vm.box = "akachanov/centos8minimal"
+
+  config.vm.network "forwarded_port", guest: 80, host: 8081
+  config.vm.network "forwarded_port", guest: 443, host: 8441
+
+  config.vm.provision "shell", inline: "systemctl stop firewalld"
+  config.vm.provision "shell", inline: "systemctl disable firewalld"
+
+  config.vm.provision "shell", inline: "yum install git -y"
+
+# repository msql 8.0.21
+# --------------------------
+  config.vm.provision "shell", inline: "yum install mysql mysql-server -y"
+  config.vm.provision "shell", inline: "systemctl start mysqld.service"
+  config.vm.provision "shell", inline: "systemctl enable mysqld.service"
+
+  config.vm.provision "shell", inline: "yum install httpd -y"
+  config.vm.provision "shell", inline: "chown -R vagrant /var/www/html"
+  config.vm.provision "shell", inline: "cp -R /vagrant/public/wordpress/ /var/www/html/"
+
+# latest php: 7.4.11
+# --------------------------
+#  config.vm.provision "shell", inline: "dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y"
+#  config.vm.provision "shell", inline: "dnf install https://rpms.remirepo.net/enterprise/remi-release-8.rpm -y"
+#  config.vm.provision "shell", inline: "dnf module enable php:remi-7.4 -y"
+#  config.vm.provision "shell", inline: "dnf install php php-cli php-common php-mysqlnd php-json -y"
+
+# repository php: 7.2.24
+# --------------------------
+  config.vm.provision "shell", inline: "yum install php php-cli php-common php-mysqlnd php-json -y"
+
+  config.vm.provision "shell", inline: "systemctl start httpd"
+  config.vm.provision "shell", inline: "systemctl enable httpd"
+
+  config.vm.provision "shell", path: "script.sh"
+#  config.vm.synced_folder "public/", "/var/www/html/"
+
+
+
+  config.vm.post_up_message = "LAMP server is ready. Listening on port :8081"
+end
