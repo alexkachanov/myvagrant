@@ -20,22 +20,27 @@ Vagrant.configure("2") do |config|
 
     machine.vm.provision "shell", inline: "systemctl stop firewalld"
 
-    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-15_linux-x64_bin.rpm -y"
-
     machine.vm.provision "shell", inline: "sudo yum install git -y"
+    machine.vm.provision "shell", inline: "sudo yum install unzip -y"
 
-    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.6.3-bin.tar.gz -C /opt"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.6.3 /opt/maven"
+    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-16_linux-x64_bin.rpm -y"
 
-    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.3.4.RELEASE-bin.tar.gz -C /opt"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.3.4.RELEASE /opt/spring"
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.8.1-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.8.1 /opt/maven"
+
+    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/gradle-7.0-bin.zip"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-7.0 /opt/gradle"
+
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.4.4-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.4.4 /opt/spring"
 
     machine.vm.provision "shell", inline: "echo 'export JAVA_HOME=/usr/java/latest' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export SPRING_HOME=/opt/spring' >> ~/.bash_profile", privileged: false
     machine.vm.provision "shell", inline: "echo 'export M2_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
     machine.vm.provision "shell", inline: "echo 'export MAVEN_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export GRADLE_HOME=/opt/gradle' >> ~/.bash_profile", privileged: false
 
-    machine.vm.provision "shell", inline: "echo 'export SPRING_HOME=/opt/spring' >> ~/.bash_profile", privileged: false
-    machine.vm.provision "shell", inline: "echo 'export PATH=${SPRING_HOME}/bin:${M2_HOME}/bin:${PATH}' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export PATH=${GRADLE_HOME}/bin:${SPRING_HOME}/bin:${M2_HOME}/bin:${PATH}' >> ~/.bash_profile", privileged: false
 
     machine.vm.post_up_message = "Java / Spring dev server is ready"
 
