@@ -16,24 +16,30 @@ Vagrant.configure("2") do |config|
 
     machine.vm.provider :virtualbox do |vb|
         vb.name = "devbox1"
+	vb.cpus = 3
     end
 
+    # stopping internal firewall
     machine.vm.provision "shell", inline: "systemctl stop firewalld"
 
     machine.vm.provision "shell", inline: "sudo yum install git -y"
     machine.vm.provision "shell", inline: "sudo yum install unzip -y"
 
-    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-16.0.1_linux-x64_bin.rpm -y"
+    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-16.0.2_linux-x64_bin.rpm -y"
 
-    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.8.1-bin.tar.gz -C /opt"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.8.1 /opt/maven"
+    # adding Maven
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.8.2-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.8.2 /opt/maven"
 
-    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/gradle-7.0-bin.zip"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-7.0 /opt/gradle"
+    # adding Gradle
+    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/gradle-7.1.1-bin.zip"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-7.1.1 /opt/gradle"
 
-    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.4.5-bin.tar.gz -C /opt"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.4.5 /opt/spring"
+    # adding Spring Boot
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.5.3-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.5.3 /opt/spring"
 
+    # configuring paths and shell
     machine.vm.provision "shell", inline: "echo 'export JAVA_HOME=/usr/java/latest' >> ~/.bash_profile", privileged: false
     machine.vm.provision "shell", inline: "echo 'export SPRING_HOME=/opt/spring' >> ~/.bash_profile", privileged: false
     machine.vm.provision "shell", inline: "echo 'export M2_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
