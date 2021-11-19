@@ -1,8 +1,33 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "akachanov/centos8minimal"
-# ubuntu/xenial64"
-  config.vm.network "forwarded_port", guest: 80, host: 8081
-  config.vm.provision "docker" do |doc|
-    doc.run "nginx", args: "-p 80:80"
+    # devbox machine used for development
+    config.vm.define "devbox1" do |machine|
+
+    	machine.vm.box = "almalinux/8"
+    	machine.vm.define "devbox1"
+    	machine.vm.hostname = "devbox1"
+
+	machine.vm.provider :virtualbox do |vb|
+        	vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+	        vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+	end
+
+    	machine.vm.network "forwarded_port", guest: 80, host: 8081
+    	machine.vm.network "forwarded_port", guest: 8080, host: 8888
+	machine.vm.network "forwarded_port", guest: 9090, host: 9999
+    	machine.vm.network "forwarded_port", guest: 443, host: 8441
+
+        # stopping internal firewall
+        machine.vm.provision "shell", inline: "systemctl stop firewalld"
+
+	machine.vm.provision "shell", inline: "sudo yum install git -y"
+	machine.vm.provision "shell", inline: "sudo yum install unzip -y"
+
+        # installing docker
+	machine.vm.provision "shell", inline: "sudo yum install -y yum-utils"
+	machine.vm.provision "shell", inline: "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+	machine.vm.provision "shell", inline: "sudo yum install -y docker-ce docker-ce-cli containerd.io"
+	machine.vm.provision "shell", inline: "sudo systemctl start docker"
+	machine.vm.provision "shell", inline: "sudo systemctl enable --now docker"
   end
+
 end
