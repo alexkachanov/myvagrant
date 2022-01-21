@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.provision "shell", inline: "echo Hello"
+  config.vm.provision "shell", inline: "echo Hello. Preparing Java / Spring dev server!"
 
   # devbox machine used for development
   config.vm.define "devbox1" do |machine|
@@ -17,6 +17,7 @@ Vagrant.configure("2") do |config|
     machine.vm.provider :virtualbox do |vb|
         vb.name = "devbox1"
 	vb.cpus = 3
+	vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
     end
 
     # stopping internal firewall
@@ -24,8 +25,10 @@ Vagrant.configure("2") do |config|
 
     machine.vm.provision "shell", inline: "sudo yum install git -y"
     machine.vm.provision "shell", inline: "sudo yum install unzip -y"
+    machine.vm.provision "shell", inline: "sudo yum install make -y"
+    machine.vm.provision "shell", inline: "sudo yum install autoconf -y"
 
-    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-16.0.2_linux-x64_bin.rpm -y"
+    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-17_linux-x64_bin.rpm -y"
 
     # adding Maven
     machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.8.2-bin.tar.gz -C /opt"
@@ -36,8 +39,8 @@ Vagrant.configure("2") do |config|
     machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-7.1.1 /opt/gradle"
 
     # adding Spring Boot
-    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.5.3-bin.tar.gz -C /opt"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.5.3 /opt/spring"
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.5.4-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.5.4 /opt/spring"
 
     # configuring paths and shell
     machine.vm.provision "shell", inline: "echo 'export JAVA_HOME=/usr/java/latest' >> ~/.bash_profile", privileged: false
