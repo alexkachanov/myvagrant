@@ -28,19 +28,19 @@ Vagrant.configure("2") do |config|
     machine.vm.provision "shell", inline: "sudo yum install make -y"
     machine.vm.provision "shell", inline: "sudo yum install autoconf -y"
 
-    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-17_linux-x64_bin.rpm -y"
+    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-19_linux-x64_bin.rpm -y"
 
     # adding Maven
-    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.8.4-bin.tar.gz -C /opt"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.8.4 /opt/maven"
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.8.6-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.8.6 /opt/maven"
 
     # adding Gradle
-    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/gradle-7.3.3-bin.zip"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-7.3.3 /opt/gradle"
+    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/gradle-7.5.1-bin.zip"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-7.5.1 /opt/gradle"
 
     # adding Spring Boot
-    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.6.3-bin.tar.gz -C /opt"
-    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.6.3 /opt/spring"
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.7.4-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.7.4 /opt/spring"
 
     # configuring paths and shell
     machine.vm.provision "shell", inline: "echo 'export JAVA_HOME=/usr/java/latest' >> ~/.bash_profile", privileged: false
