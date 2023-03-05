@@ -1,0 +1,61 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", inline: "echo Hello. Preparing Java / Spring dev server!"
+  config.vbguest.auto_update = false
+
+  # devbox machine used for development
+  config.vm.define "devbox1" do |machine|
+    machine.vm.box = "almalinux/8"
+    machine.vm.define "devbox1"
+    machine.vm.hostname = "devbox1"
+
+    machine.vm.network "forwarded_port", guest: 80, host: 8081
+    machine.vm.network "forwarded_port", guest: 8080, host: 8888
+    machine.vm.network "forwarded_port", guest: 443, host: 8441
+    machine.vm.network "forwarded_port", guest: 9878, host: 9878
+
+    machine.vm.provider :virtualbox do |vb|
+        vb.name = "devbox1"
+	vb.cpus = 3
+	vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    end
+
+    # stopping internal firewall
+    machine.vm.provision "shell", inline: "systemctl stop firewalld"
+
+    machine.vm.provision "shell", inline: "sudo yum install git -y"
+    machine.vm.provision "shell", inline: "sudo yum install unzip -y"
+    machine.vm.provision "shell", inline: "sudo yum install make -y"
+    machine.vm.provision "shell", inline: "sudo yum install autoconf -y"
+    machine.vm.provision "shell", inline: "sudo yum install tcpdump -y"
+
+    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-19_linux-x64_bin.rpm -y"
+
+    # adding Maven
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.8.7-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.8.7 /opt/maven"
+
+    # adding Gradle
+    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/gradle-7.6-bin.zip"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-7.6 /opt/gradle"
+
+    # adding Spring Boot
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-2.7.7-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-2.7.7 /opt/spring"
+
+    # configuring paths and shell
+    machine.vm.provision "shell", inline: "echo 'export JAVA_HOME=/usr/java/latest' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export SPRING_HOME=/opt/spring' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export M2_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export MAVEN_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export GRADLE_HOME=/opt/gradle' >> ~/.bash_profile", privileged: false
+
+    machine.vm.provision "shell", inline: "echo 'export PATH=${GRADLE_HOME}/bin:${SPRING_HOME}/bin:${M2_HOME}/bin:${PATH}' >> ~/.bash_profile", privileged: false
+
+    machine.vm.post_up_message = "Java / Spring dev server is ready"
+
+  end
+
+end
