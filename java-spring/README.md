@@ -1,9 +1,9 @@
 Installs:
 * Git
-* Java
-* Maven
-* Gradle
-* Spring Boot
+* Java 19.0.2
+* Maven 3.8.7
+* Gradle 7.6
+* Spring Boot 2.7.7
 
 Requires:
 * Java: jdk-19_linux-x64_bin.rpm
