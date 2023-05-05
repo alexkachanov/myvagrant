@@ -1,0 +1,69 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", inline: "echo Hello. Preparing GraalVM / Spring / Micronaut dev server!"
+  config.vbguest.auto_update = false
+
+  # devbox machine used for development
+  config.vm.define "devbox1" do |machine|
+    machine.vm.box = "almalinux/8"
+    machine.vm.define "devbox1"
+    machine.vm.hostname = "devbox1"
+
+    machine.vm.network "forwarded_port", guest: 80, host: 8081
+    machine.vm.network "forwarded_port", guest: 8080, host: 8888
+    machine.vm.network "forwarded_port", guest: 443, host: 8441
+
+    machine.vm.provider :virtualbox do |vb|
+        vb.name = "devbox1"
+	vb.cpus = 6
+        vb.memory = 16048
+	vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    end
+
+    # stopping internal firewall
+    machine.vm.provision "shell", inline: "systemctl stop firewalld"
+
+    machine.vm.provision "shell", inline: "sudo yum install gcc -y"
+    machine.vm.provision "shell", inline: "sudo yum install git -y"
+    machine.vm.provision "shell", inline: "sudo yum install unzip -y"
+    machine.vm.provision "shell", inline: "sudo yum install make -y"
+    machine.vm.provision "shell", inline: "sudo yum install autoconf -y"
+
+    # adding GraalVM
+    machine.vm.provision "shell", inline: "sudo tar -xzf /vagrant/graalvm-ce-java17-linux-amd64-22.3.2.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/graalvm-ce-java17-22.3.2 /opt/graalvm"
+    machine.vm.provision "shell", inline: "sudo /opt/graalvm/bin/gu install native-image"
+
+    # adding Maven
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.9.1-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.9.1 /opt/maven"
+
+    # adding Gradle
+    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/gradle-8.1.1-bin.zip"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-8.1.1 /opt/gradle"
+
+    # adding Micronaut
+    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/micronaut-cli-3.9.1.zip"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/micronaut-cli-3.9.1 /opt/micronaut"
+
+    # adding Spring Boot
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-3.0.6-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-3.0.6 /opt/spring"
+
+    # configuring paths and shell
+    machine.vm.provision "shell", inline: "echo 'export JAVA_HOME=/opt/graalvm' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export SPRING_HOME=/opt/spring' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export MICRONAUT_HOME=/opt/micronaut' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export M2_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export MAVEN_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export GRADLE_HOME=/opt/gradle' >> ~/.bash_profile", privileged: false
+
+    machine.vm.provision "shell", inline: "echo 'export PATH=${JAVA_HOME}/bin:${GRADLE_HOME}/bin:${MICRONAUT_HOME}/bin:${SPRING_HOME}/bin:${M2_HOME}/bin:${PATH}' >> ~/.bash_profile", privileged: false
+
+    machine.vm.post_up_message = "GraalVM / Spring / Micronaut dev server is ready"
+
+  end
+
+end
