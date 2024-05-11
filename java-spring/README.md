@@ -1,12 +1,12 @@
 Installs:
 * Git
-* Java 19.0.2
-* Maven 3.8.7
-* Gradle 7.6
-* Spring Boot 2.7.7
+* Java 21.0.3
+* Maven 3.9.6
+* Gradle 8.7
+* Spring Boot 3.2.5
 
 Requires:
-* Java: jdk-19_linux-x64_bin.rpm
-* Maven: apache-maven-3.8.7-bin.tar.gz
-* Gradle: gradle-7.6-bin.zip
-* Spring Boot: spring-boot-cli-2.7.7-bin.tar.gz
+* Java: jdk-21_linux-x64_bin.rpm
+* Maven: apache-maven-3.9.6-bin.tar.gz
+* Gradle: gradle-8.7-bin.zip
+* Spring Boot: spring-boot-cli-3.2.5-bin.tar.gz
