@@ -1,4 +1,10 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
 Vagrant.configure("2") do |config|
+    config.vm.provision "shell", inline: "echo Hello. Preparing Docker server!"
+    config.vbguest.auto_update = false
+
     # devbox machine used for development
     config.vm.define "devbox1" do |machine|
 
@@ -19,8 +25,37 @@ Vagrant.configure("2") do |config|
         # stopping internal firewall
         machine.vm.provision "shell", inline: "systemctl stop firewalld"
 
+        machine.vm.provision "shell", inline: "rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux"
+
+
 	machine.vm.provision "shell", inline: "sudo yum install git -y"
 	machine.vm.provision "shell", inline: "sudo yum install unzip -y"
+    
+    machine.vm.provision "shell", inline: "sudo yum install make -y"
+    machine.vm.provision "shell", inline: "sudo yum install autoconf -y"
+
+    machine.vm.provision "shell", inline: "sudo yum localinstall /vagrant/jdk-21_linux-x64_bin.rpm -y"
+
+    # adding Maven
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/apache-maven-3.9.9-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/apache-maven-3.9.9 /opt/maven"
+
+    # adding Gradle
+    machine.vm.provision "shell", inline: "sudo unzip -d /opt /vagrant/gradle-8.14.1-bin.zip"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/gradle-8.14.1 /opt/gradle"
+
+    # adding Spring Boot
+    machine.vm.provision "shell", inline: "sudo tar -xvzf /vagrant/spring-boot-cli-3.5.0-bin.tar.gz -C /opt"
+    machine.vm.provision "shell", inline: "sudo ln -sfn  /opt/spring-3.5.0 /opt/spring"
+
+    # configuring paths and shell
+    machine.vm.provision "shell", inline: "echo 'export JAVA_HOME=/usr/java/latest' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export SPRING_HOME=/opt/spring' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export M2_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export MAVEN_HOME=/opt/maven' >> ~/.bash_profile", privileged: false
+    machine.vm.provision "shell", inline: "echo 'export GRADLE_HOME=/opt/gradle' >> ~/.bash_profile", privileged: false
+
+    machine.vm.provision "shell", inline: "echo 'export PATH=${GRADLE_HOME}/bin:${SPRING_HOME}/bin:${M2_HOME}/bin:${PATH}' >> ~/.bash_profile", privileged: false
 
         # installing docker
 	machine.vm.provision "shell", inline: "sudo yum install -y yum-utils"
